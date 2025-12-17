@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template,request,url_for,redirect
+from flask import render_template,request,url_for,redirect,abort,flash
 from flask_migrate import Migrate
 from datetime import datetime
 import os
@@ -8,7 +8,13 @@ from werkzeug.utils import secure_filename
 
 app=Flask(__name__)
 
+<<<<<<< HEAD
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
+=======
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:PASSWORD@localhost:5432/bhv_db'
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+
+>>>>>>> e5be5a0 (fix: address review feedback and improve production readiness)
 db=SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -43,18 +49,25 @@ def upload():
             UPLOAD_FOLDER = os.path.join('static', 'uploads')
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+            if file.mimetype not in {"image/jpeg", "image/png", "image/jpg"}:
+                abort(400, "Unsupported file type")
+
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
+
 
             new_entry = Entries(
                 patient_name=patient_name,
                 image_name=filename,
                 narrative=narrative
             )
+
             db.session.add(new_entry)
             db.session.commit()
 
-            return "Upload successful! File saved and entry recorded in the database."
+            flash("Upload successful! File saved and entry recorded in the database.", "success")
+            return redirect(url_for("gallery", search_term=patient_name))
+
 
         else:
             return "Please provide a name and select a file."
@@ -76,4 +89,4 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
