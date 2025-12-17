@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template,request
+from flask import render_template,request,url_for,redirect
 from flask_migrate import Migrate
 from datetime import datetime
 import os
@@ -61,10 +61,16 @@ def upload():
 
     return render_template('upload.html')
 
+@app.route('/search')
+def search():
+    query = request.args.get('q') # Make sure this matches name="q" in your HTML
+    if query:
+        return redirect(url_for('gallery', search_term=query))
+    return redirect(url_for('home'))
 
 @app.route('/gallery/<search_term>')
 def gallery(search_term):
-    user_entries = Entries.query.filter_by(patient_name=search_term).all()
+    user_entries = Entries.query.filter(Entries.patient_name.ilike(f"%{search_term}%")).all()
     
     return render_template('gallery.html', entries=user_entries, patient=search_term)
     
