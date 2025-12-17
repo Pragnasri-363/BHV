@@ -17,13 +17,27 @@ The system should avoid unnecessary bloat to enable easy installation in healthc
 The front-end should be kept minimal to allow the entire system to be run from a single command (rather than expecting the front-end, backend, and database to be run separately).
 
 The storage of the images could be in a file system with an index to retrieve them easily. The index itself could be in a database to allow easy queries.
+# Features:
+ - Has minimal frontend using flask related template jinja
+ -backend ,frontend run together and even database is handled inside the application.
+ -Runs using a single command.
 
-## To run the Project,follow this:
+## Tech Stack used:
+
+- Python
+- Flask
+- HTML, CSS
+- PostgreSQL(database)
+- SQLAlchemy
+- Alembic (for database migrations)
+
+# To run the Project,follow this:
 
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
    
 
-step2- to launch app:
+2. to launch app:
+    ```bash
     python app.py
