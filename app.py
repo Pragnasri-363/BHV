@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 app=Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:PASSWORD@localhost:5432/bhv_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
 db=SQLAlchemy(app)
 migrate = Migrate(app, db)
 
