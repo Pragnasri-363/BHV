@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHV - Share Your Journey</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Mental Health is a journey, not a destination</h1>
+    <h3>Share your journey below to voice your battle.</h3>
+
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+
+        <label for="patient_name">Your Name:</label>
+        <input type="text" name="patient_name" id="patient_name" placeholder="Type your name here" required>
+        
+        <label for="patient_image">Choose an Image:</label>
+        <input type="file" name="patient_image" id="patient_image" accept="image/*" required>
+        <small>You can upload a photo that represents how you're feeling or your mood.</small>
+        
+        <label for="narrative">Share Your Story:</label>
+        <textarea name="narrative" id="narrative" rows="6"
+            placeholder="Tell us about your journey, your thoughts, or what this image means to you..."></textarea>
+        <small>Don't worry about being perfect – just share what feels right!</small>
+
+
+        <button type="submit">Upload your Journey</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('home') }}">Go back to homepage</a>
+</body>
+
+</html>

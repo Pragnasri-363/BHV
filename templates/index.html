@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>BHV</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to Behavioral Health Vault</h1>
+    <p>Enter a patient's name to retrieve their data.</p>
+
+    <form action="/search" method="GET">
+        <input type="text" name="q" placeholder="Enter patient name..." required>
+        <button type="submit">Search</button>
+    </form>
+
+    <br>
+    <a href="/upload">Go to Upload Page</a>
+</body>
+
+</html>

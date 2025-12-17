@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Patient History: {{ patient }}</title>
+    <style>
+        .entry-card {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        img {
+            max-width: 300px;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Journey of {{ patient }}</h1>
+    <hr>
+
+    {% for entry in entries %}
+    <div class="entry-card">
+        <img src="{{ url_for('static', filename='uploads/' + entry.image_name) }}" alt="Patient Image">
+        <p><strong>Narrative:</strong> {{ entry.narrative }}</p>
+        <small>Recorded on: {{ entry.created_at.strftime('%Y-%m-%d') }}</small>
+    </div>
+    {% else %}
+    <p>No entries found for this patient.</p>
+    {% endfor %}
+
+    <br>
+    <a href="/upload">Upload New Entry</a>
+</body>
+
+</html>
