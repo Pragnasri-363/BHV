@@ -8,13 +8,12 @@ from werkzeug.utils import secure_filename
 
 app=Flask(__name__)
 
-<<<<<<< HEAD
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
-=======
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:PASSWORD@localhost:5432/bhv_db'
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
->>>>>>> e5be5a0 (fix: address review feedback and improve production readiness)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-later')
+
+app.config['MAX_CONTENT_LENGTH']= 3*1024*1024 #3MB
+
 db=SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -27,6 +26,11 @@ class Entries(db.Model):
     image_name = db.Column(db.String(255), nullable=False)
     narrative = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.errorhandler(413)
+def file_too_large(error):
+    flash("Image size must be less than 3MB")
+    return redirect(url_for('upload'))
 
 @app.route('/')
 def home():
@@ -52,6 +56,10 @@ def upload():
             if file.mimetype not in {"image/jpeg", "image/png", "image/jpg"}:
                 abort(400, "Unsupported file type")
 
+            name, ext = os.path.splitext(filename)
+            timestamp = str(datetime.utcnow().timestamp()).replace(".", "")
+            filename = f"{timestamp}_{name}{ext}"
+            
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
 
@@ -67,8 +75,8 @@ def upload():
 
             flash("Upload successful! File saved and entry recorded in the database.", "success")
             return redirect(url_for("gallery", search_term=patient_name))
-
-
+        
+        
         else:
             return "Please provide a name and select a file."
 
@@ -89,4 +97,4 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
