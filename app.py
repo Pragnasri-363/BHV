@@ -59,7 +59,7 @@ def upload():
             name, ext = os.path.splitext(filename)
             timestamp = str(datetime.utcnow().timestamp()).replace(".", "")
             filename = f"{timestamp}_{name}{ext}"
-            
+
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
 
@@ -97,4 +97,4 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
