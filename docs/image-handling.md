@@ -1,6 +1,6 @@
 # Image Handling (Proposed):
 
-This document describes a minimal and privacy-preserving image upload and storage pipeline for BHV.Since the backend is currently not implemented, this document serves as a design reference for future work.
+This document describes a minimal and privacy-preserving image upload and storage pipeline for BHV. Since the backend is currently not implemented, this document serves as a design reference for future work.
 
 ## Goals
 
