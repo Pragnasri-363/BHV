@@ -12,7 +12,7 @@ This document describes a minimal and privacy-preserving image upload and storag
 
 1. User uploads an image via the web interface
 2. Server validates:
-   - File type (image only)
+   - File type (e.g., JPEG, PNG, GIF; disallowing formats like SVG)
    - File size (configurable limit)
 3. Image metadata (EXIF) is stripped
 4. Sanitized image is stored on disk
