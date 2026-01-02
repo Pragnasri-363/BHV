@@ -26,7 +26,7 @@ Images may contain embedded metadata such as:
 - Device identifiers
 - Timestamps
 
-Retaining this metadata may unintentionally expose sensitive user information. For a behavioral health application, this might add some risk for user. Therefore, this feature helps us remove all metadata prior to storage.
+Retaining this metadata may unintentionally expose sensitive user information. For a behavioral health application, this poses a significant risk to user privacy. Therefore, all metadata will be removed prior to storage.
 
 ## Implementation Notes (Future Work)
 
