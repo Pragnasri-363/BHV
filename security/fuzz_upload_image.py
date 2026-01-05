@@ -30,3 +30,17 @@ reviewing image upload logic.
 # NOTE:
 # This script intentionally avoids complex fuzzing infrastructure to align with BHV's goal to have a minimal application with security.
 # The goal is early detection of failure modes, not exhaustive testing.
+
+import os
+from PIL import Image
+
+def load_and_verify(image_path):
+    try:
+        with Image.open(image_path) as im:
+            im.verify()
+        print(f"[+] Verified seed image: {image_path}")
+        return image_path
+    except (OSError, SyntaxError) as e:
+        print(f"[!] Bad seed image {image_path}: {e}")
+        return None
+

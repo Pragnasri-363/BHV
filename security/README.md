@@ -32,3 +32,6 @@ python security/fuzz_upload_images.py
 
 
 ```
+### Dependencies
+- Pillow (for image parsing and verification)
+
