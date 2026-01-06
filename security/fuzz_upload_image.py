@@ -33,6 +33,7 @@ reviewing image upload logic.
 
 import os
 from PIL import Image
+import random
 
 def load_and_verify(image_path):
     try:
@@ -44,3 +45,43 @@ def load_and_verify(image_path):
         print(f"[!] Bad seed image {image_path}: {e}")
         return None
 
+def truncate_image(ip_path,op_path):
+    with open(ip_path, "rb") as f:
+        data = f.read()
+
+
+    if len(data)<2:
+        return False
+    
+    cut=random.randint(1,len(data)-1)
+    truncated=data[:-cut]
+
+    with open(op_path, "wb") as f:
+        f.write(truncated)
+
+    return truncated
+
+# Truncation helps us find the cases where program assumes data will alway be a certain length.It can also be used to shrink the input when massive inputs crashes the program.
+
+if __name__ == "__main__":
+    seed_dir = "security/seeds"
+    output_dir = "security/tmp"
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    for filename in os.listdir(seed_dir):
+        seed_path = os.path.join(seed_dir, filename)
+
+        # Step 1: validate seed
+        if not load_and_verify(seed_path):
+            continue
+
+        # Step 2: truncate
+        corrupted_path = os.path.join(output_dir, f"truncated_{filename}")
+        truncate_image(seed_path, corrupted_path)
+
+        # Step 3: test corrupted image
+        load_and_verify(corrupted_path)
+
+# Truncated images are expected to fail verification.
+# This harness ensures such failures are detected safely without crashing the application.
