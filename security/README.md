@@ -27,7 +27,7 @@ Fuzzing can be used for various purposes like:
 # How to run the fuzz test:
 
 ```bash
-python security/fuzz_upload_images.py
+python security/fuzz_upload_image.py
 
 
 
