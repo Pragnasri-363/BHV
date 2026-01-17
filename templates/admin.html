@@ -323,7 +323,7 @@
                         <img src="{{ url_for('static', filename='avatars/default-admin.png') }}" class="avatar-img" alt="Admin Avatar" />
 
                         <div class="user-info">
-                            <span class="name">John Doe</span>
+                            <span class="name">{{ admin_name | default('Administrator') }}</span>
                             <span class="role">Administrator</span>
                         </div>
                     </div>
