@@ -36,8 +36,3 @@ The storage of the images could be in a file system with an index to retrieve th
 1. Install dependencies:
    ```bash
    pip install -r requirements.txt
-   
-
-2. to launch app:
-    ```bash
-    python app.py
