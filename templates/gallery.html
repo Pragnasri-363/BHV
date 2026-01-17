@@ -24,7 +24,8 @@
 
     {% for entry in entries %}
     <div class="entry-card">
-        <img src="{{ url_for('static', filename='uploads/' + entry.image_name) }}" alt="Patient Image">
+        <img src="{{ url_for('static', filename='uploads/' + entry.image_name) }}"
+                    alt="Image for patient {{ entry.patient_name }}">
         <p><strong>Narrative:</strong> {{ entry.narrative }}</p>
         <small>Recorded on: {{ entry.created_at.strftime('%Y-%m-%d') }}</small>
     </div>

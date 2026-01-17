@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template,request,url_for,redirect,abort,flash,jsonify
+from flask import render_template,request,url_for,redirect,abort,flash,jsonify,session,current_app
 from flask_migrate import Migrate
 from datetime import datetime
 import os
@@ -9,9 +9,20 @@ from models import Notification,db
 
 app=Flask(__name__)
 
+@app.before_request
+def auto_admin_session():
+    if request.path.startswith("/admin"):
+        session["is_admin"] = True
 
+<<<<<<< HEAD
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+=======
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-later')
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+>>>>>>> 4a18783 (Refactor upload and notifications; move JS/CSS)
 
 app.config['MAX_CONTENT_LENGTH']= 3*1024*1024 #3MB
 
@@ -35,10 +46,15 @@ def admin_dashboard():
     return render_template("admin.html")
 
 def require_admin():
+<<<<<<< HEAD
     admin_key = request.headers.get("X-ADMIN-KEY")
     expected_key = os.environ.get("ADMIN_KEY")
     if not expected_key or admin_key != expected_key:
+=======
+    if not session.get("is_admin"):
+>>>>>>> 4a18783 (Refactor upload and notifications; move JS/CSS)
         abort(403)
+
 
 @app.route("/api/admin/notifications/unread-count", methods=["GET"])
 def unread_notification_count():
@@ -56,16 +72,7 @@ def get_notifications():
         .all()
     )
 
-    return jsonify([
-        {
-            "id": n.id,
-            "title": n.title,
-            "message": n.message,
-            "seen": n.seen,
-            "created_at": n.created_at.isoformat()
-        }
-        for n in notifications
-    ])
+    return jsonify([n.to_dict() for n in notifications])
 
 @app.route("/api/admin/notifications/mark-seen", methods=["POST"])
 def mark_notifications_seen():
@@ -96,9 +103,9 @@ def upload():
         if file and patient_name:
             # Secure the file name
             filename = secure_filename(file.filename)
-            
-            UPLOAD_FOLDER = os.path.join('static', 'uploads')
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+
+            os.makedirs(upload_folder, exist_ok=True)
 
             if file.mimetype not in {"image/jpeg", "image/png", "image/jpg"}:
                 abort(400, "Unsupported file type")
@@ -107,8 +114,9 @@ def upload():
             timestamp = str(datetime.utcnow().timestamp()).replace(".", "")
             filename = f"{timestamp}_{name}{ext}"
 
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
+
 
 
             new_entry = Entries(
@@ -138,7 +146,8 @@ def upload():
         
         
         else:
-            return "Please provide a name and select a file."
+            flash("Please provide a name and select a file.", "error")
+            return redirect(url_for('upload'))
 
     return render_template('upload.html')
 
@@ -157,4 +166,4 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
