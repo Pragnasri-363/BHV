@@ -10,7 +10,7 @@ from models import Notification,db
 app=Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres:pragnasri@localhost:5432/bhv_db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-later')
 
 app.config['MAX_CONTENT_LENGTH']= 3*1024*1024 #3MB
