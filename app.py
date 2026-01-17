@@ -149,7 +149,10 @@ def upload():
             flash("Please provide a name and select a file.", "error")
             return redirect(url_for('upload'))
 
-    return render_template('upload.html')
+    return render_template(
+    "upload.html",
+    max_file_size=app.config['MAX_CONTENT_LENGTH'])
+
 
 @app.route('/search')
 def search():
