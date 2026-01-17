@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - BHV</title>
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --panel: #ffffff;
+            --primary: #1976d2;
+            --text: #1f2933;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #f43f5e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: #0b1d3a;
+            color: #e2e8f0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .sidebar .brand {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .sidebar a {
+            color: #e2e8f0;
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .topbar {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
+
+        .search input {
+            border: none;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            position: relative;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 8px 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .icon-btn .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: white;
+            border-radius: 999px;
+            padding: 2px 6px;
+            font-size: 11px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        .avatar {
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .user-info .name {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .user-info .role {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 20px;
+            border-radius: 0px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.2);
+        }
+
+        .hero h1 {
+            margin: 0 0 6px 0;
+        }
+
+        .hero p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .stat-title {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            margin-top: 6px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .panel h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: #f9fafb;
+        }
+
+        .notification-item.unseen {
+            border-color: #dbeafe;
+            background: #eff6ff;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ghost-btn {
+            border: 1px solid var(--border);
+            background: white;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .notification-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 420px;
+            min-height: 160px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+        }
+
+        .hidden {
+            display: none;
+        }
+        .avatar-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">BHV Admin</div>
+            <div class="menu">
+                <a href="/admin" class="active">Dashboard</a>
+                <a href="/upload">Uploads</a>
+                <a href="#">Support</a>
+            </div>
+
+        </aside>
+        <div class="main">
+            <header class="topbar">
+                <div class="search">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Search..." />
+                </div>
+                <div class="top-actions">
+                    <button class="icon-btn" onclick="toggleNotificationPanel()">
+                        🔔
+                        <span id="unread-count" class="badge">0</span>
+                    </button>
+                    <div class="user-box">
+                        <img src="{{ url_for('static', filename='avatars/default-admin.png') }}" class="avatar-img" alt="Admin Avatar" />
+
+                        <div class="user-info">
+                            <span class="name">John Doe</span>
+                            <span class="role">Administrator</span>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <div style="position: absolute; top: 70px; right: 20px; z-index: 20;">
+                <div id="notification-panel" class="notification-panel hidden">
+            
+                    <strong style="display:block; margin-bottom:8px;">
+                        Notifications
+                    </strong>
+            
+                    <div id="notifications-list-panel" style="max-height: 340px; overflow-y:auto;">
+                        <div id="no-notifications" style="
+                            height: 120px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #9ca3af;
+                            font-size: 14px;
+                            text-align: center;
+                        ">
+                            No notifications
+                        </div>
+                    </div>
+            
+                </div>
+            </div>
+
+
+            <main class="content">
+                <section class="hero">
+                    <div>
+                        <h1>Welcome back, John Doe</h1>
+                        <p>Monitor new uploads and pending items.</p>
+                    </div>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-title">Pending</div>
+                            <div class="stat-value" id="stat-pending">--</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Completed</div>
+                            <div class="stat-value" id="stat-completed">--</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Total</div>
+                            <div class="stat-value" id="stat-total">--</div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_HEADERS = { "X-ADMIN-KEY": "dev-admin" };
+
+        function toggleNotificationPanel() {
+                const panel = document.getElementById("notification-panel");
+                const opening = panel.classList.contains("hidden");
+
+                if (opening) {
+                    panel.classList.remove("hidden");
+
+                    
+                    fetchNotifications();
+
+                    
+                    setTimeout(() => {
+                        markAllAsSeen();
+                    }, 500);
+                } else {
+                    panel.classList.add("hidden");
+                }
+            }
+
+        function renderNotifications(targetId, data) {
+                const listDiv = document.getElementById(targetId);
+                const emptyDiv = document.getElementById("no-notifications");
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    if (emptyDiv) emptyDiv.style.display = "flex";
+                    return 0;
+                }
+
+                if (emptyDiv) emptyDiv.remove();
+
+                listDiv.innerHTML = data.map(n => `
+                    <div class="notification-item ${n.seen ? '' : 'unseen'}">
+                        <div class="notification-title">${n.title}</div>
+                        <div>${n.message}</div>
+                        <div class="notification-time">
+                            ${new Date(n.created_at).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+
+                return data.filter(n => !n.seen).length;
+            }
+
+
+
+
+        async function fetchNotifications() {
+                const res = await fetch('/api/admin/notifications', {
+                    headers: { "X-ADMIN-KEY": "dev-admin" }
+                });
+
+                const data = await res.json();
+
+                const unread = renderNotifications("notifications-list-panel", data);
+                document.getElementById("unread-count").textContent = unread;
+            }
+
+
+
+
+        async function markAllAsSeen() {
+            try {
+                await fetch('/api/admin/notifications/mark-seen', { method: 'POST', headers: ADMIN_HEADERS });
+                fetchNotifications();
+            } catch (err) {
+                console.error('Error marking as seen:', err);
+            }
+        }
+
+        fetchNotifications();
+
+    </script>
+</body>
+
+</html>

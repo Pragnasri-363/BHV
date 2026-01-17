@@ -1,21 +1,24 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template,request,url_for,redirect,abort,flash
+from flask import render_template,request,url_for,redirect,abort,flash,jsonify
 from flask_migrate import Migrate
 from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
+from models import Notification,db
 
 app=Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres:pragnasri@localhost:5432/bhv_db')
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-later')
 
 app.config['MAX_CONTENT_LENGTH']= 3*1024*1024 #3MB
 
-db=SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
+
+
 
 class Entries(db.Model):
     __tablename__="entries"
@@ -26,6 +29,49 @@ class Entries(db.Model):
     image_name = db.Column(db.String(255), nullable=False)
     narrative = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.route("/admin")
+def admin_dashboard():
+    return render_template("admin.html")
+
+def require_admin():
+    admin_key = request.headers.get("X-ADMIN-KEY")
+    if admin_key != "dev-admin":
+        abort(403)
+
+@app.route("/api/admin/notifications/unread-count", methods=["GET"])
+def unread_notification_count():
+    require_admin()
+    count = Notification.query.filter_by(seen=False).count()
+    return jsonify({"unread_count": count})
+
+@app.route("/api/admin/notifications", methods=["GET"])
+def get_notifications():
+    require_admin()
+    notifications = (
+        Notification.query
+        .order_by(Notification.created_at.desc())
+        .limit(20)
+        .all()
+    )
+
+    return jsonify([
+        {
+            "id": n.id,
+            "title": n.title,
+            "message": n.message,
+            "seen": n.seen,
+            "created_at": n.created_at.isoformat()
+        }
+        for n in notifications
+    ])
+
+@app.route("/api/admin/notifications/mark-seen", methods=["POST"])
+def mark_notifications_seen():
+    require_admin()
+    Notification.query.filter_by(seen=False).update({"seen": True})
+    db.session.commit()
+    return jsonify({"status": "ok"})
 
 @app.errorhandler(413)
 def file_too_large(error):
@@ -73,6 +119,19 @@ def upload():
             db.session.add(new_entry)
             db.session.commit()
 
+            now = datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")
+
+            notification = Notification(
+                patient_name=patient_name,
+                image_name=filename,
+                title=patient_name,
+                message=f"Uploaded {filename} at {now}",
+                seen=False
+            )
+
+            db.session.add(notification)
+            db.session.commit()
+
             flash("Upload successful! File saved and entry recorded in the database.", "success")
             return redirect(url_for("gallery", search_term=patient_name))
         
@@ -97,4 +156,4 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
