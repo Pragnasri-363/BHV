@@ -27,7 +27,7 @@ The storage of the images could be in a file system with an index to retrieve th
 - Python
 - Flask
 - HTML, CSS
-- PostgreSQL(database)
+- PostgreSQL (database)
 - SQLAlchemy
 - Alembic (for database migrations)
 
