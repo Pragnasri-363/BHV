@@ -18,9 +18,9 @@ The front-end should be kept minimal to allow the entire system to be run from a
 
 The storage of the images could be in a file system with an index to retrieve them easily. The index itself could be in a database to allow easy queries.
 # Features:
- - Has minimal frontend using flask related template jinja
- -backend ,frontend run together and even database is handled inside the application.
- -Runs using a single command.
+ - Has a minimal frontend using Jinja templates.
+ - The backend and frontend run together as a single application.
+ - Runs using a single command.
 
 ## Tech Stack used:
 
