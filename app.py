@@ -36,7 +36,8 @@ def admin_dashboard():
 
 def require_admin():
     admin_key = request.headers.get("X-ADMIN-KEY")
-    if admin_key != "dev-admin":
+    expected_key = os.environ.get("ADMIN_KEY")
+    if not expected_key or admin_key != expected_key:
         abort(403)
 
 @app.route("/api/admin/notifications/unread-count", methods=["GET"])
