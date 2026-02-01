@@ -6,6 +6,7 @@ from datetime import datetime
 import os
 from werkzeug.utils import secure_filename
 from models import Notification,db
+from urllib.parse import quote
 
 app=Flask(__name__)
 
@@ -14,16 +15,10 @@ def auto_admin_session():
     if request.path.startswith("/admin"):
         session["is_admin"] = True
 
-<<<<<<< HEAD
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
-=======
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://user:password@localhost:5432/bhv_db')
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-later')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/your_db')
+app.config['SECRET_KEY'] = 'any-random-string-here-for-now'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
->>>>>>> 4a18783 (Refactor upload and notifications; move JS/CSS)
-
 app.config['MAX_CONTENT_LENGTH']= 3*1024*1024 #3MB
 
 db.init_app(app)
@@ -46,13 +41,9 @@ def admin_dashboard():
     return render_template("admin.html")
 
 def require_admin():
-<<<<<<< HEAD
     admin_key = request.headers.get("X-ADMIN-KEY")
     expected_key = os.environ.get("ADMIN_KEY")
     if not expected_key or admin_key != expected_key:
-=======
-    if not session.get("is_admin"):
->>>>>>> 4a18783 (Refactor upload and notifications; move JS/CSS)
         abort(403)
 
 
@@ -94,6 +85,7 @@ def home():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    patient_name = None
     if request.method == 'POST':
         # Get form data
         patient_name = request.form.get('patient_name')
@@ -101,50 +93,55 @@ def upload():
         file = request.files.get('patient_image')
 
         if file and patient_name:
-            # Secure the file name
-            filename = secure_filename(file.filename)
-            upload_folder = current_app.config['UPLOAD_FOLDER']
 
-            os.makedirs(upload_folder, exist_ok=True)
+            try:
+                # Secure the file name
+                filename = secure_filename(file.filename)
+                upload_folder = current_app.config['UPLOAD_FOLDER']
 
-            if file.mimetype not in {"image/jpeg", "image/png", "image/jpg"}:
-                abort(400, "Unsupported file type")
+                os.makedirs(upload_folder, exist_ok=True)
 
-            name, ext = os.path.splitext(filename)
-            timestamp = str(datetime.utcnow().timestamp()).replace(".", "")
-            filename = f"{timestamp}_{name}{ext}"
+                if file.mimetype not in {"image/jpeg", "image/png", "image/jpg"}:
+                    abort(400, "Unsupported file type")
 
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(file_path)
+                name, ext = os.path.splitext(filename)
+                timestamp = str(datetime.utcnow().timestamp()).replace(".", "")
+                filename = f"{timestamp}_{name}{ext}"
+
+                file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
 
 
 
-            new_entry = Entries(
-                patient_name=patient_name,
-                image_name=filename,
-                narrative=narrative
-            )
+                new_entry = Entries(
+                    patient_name=patient_name,
+                    image_name=filename,
+                    narrative=narrative
+                )
 
-            db.session.add(new_entry)
-            db.session.commit()
+                db.session.add(new_entry)
+                db.session.commit()
 
-            now = datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")
+                now = datetime.utcnow().strftime("%d %b %Y, %H:%M UTC")
 
-            notification = Notification(
-                patient_name=patient_name,
-                image_name=filename,
-                title=patient_name,
-                message=f"Uploaded {filename} at {now}",
-                seen=False
-            )
+                notification = Notification(
+                    patient_name=patient_name,
+                    image_name=filename,
+                    title=patient_name,
+                    message=f"Uploaded {filename} at {now}",
+                    seen=False
+                )
 
-            db.session.add(notification)
-            db.session.commit()
+                db.session.add(notification)
+                db.session.commit()
 
-            flash("Upload successful! File saved and entry recorded in the database.", "success")
-            return redirect(url_for("gallery", search_term=patient_name))
-        
-        
+                flash("Upload successful! File saved and entry recorded in the database.", "success")
+                return redirect(url_for("gallery", search_term=quote(patient_name)))
+            
+            except Exception as e:
+                db.session.rollback()  # Undo DB changes if it crashes halfway
+                print(f"CRASH DETECTED: {e}")
+                return f"Internal Server Error: {e}", 500
         else:
             flash("Please provide a name and select a file.", "error")
             return redirect(url_for('upload'))
@@ -161,7 +158,7 @@ def search():
         return redirect(url_for('gallery', search_term=query))
     return redirect(url_for('home'))
 
-@app.route('/gallery/<search_term>')
+@app.route('/gallery/<path:search_term>')
 def gallery(search_term):
     user_entries = Entries.query.filter(Entries.patient_name.ilike(f"%{search_term}%")).all()
     
@@ -169,4 +166,6 @@ def gallery(search_term):
     
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=False)
